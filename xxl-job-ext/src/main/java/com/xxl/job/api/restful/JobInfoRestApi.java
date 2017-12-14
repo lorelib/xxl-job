@@ -1,7 +1,7 @@
 package com.xxl.job.api.restful;
 
 import com.xxl.job.admin.core.model.XxlJobInfo;
-import com.xxl.job.commons.Response;
+import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.service.XxlJobService;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +21,7 @@ public class JobInfoRestApi {
 
   @PostMapping("")
   @ResponseBody
-  public Response<XxlJobInfo> add(@RequestBody XxlJobInfo jobInfo) {
+  public ReturnT<XxlJobInfo> add(@RequestBody XxlJobInfo jobInfo) {
     return xxlJobService.add(jobInfo);
   }
 }

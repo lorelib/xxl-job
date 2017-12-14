@@ -2,10 +2,7 @@ package com.xxl.job.service;
 
 
 import com.xxl.job.admin.core.model.XxlJobInfo;
-import com.xxl.job.commons.Response;
 import com.xxl.job.core.biz.model.ReturnT;
-
-import java.io.Serializable;
 
 /**
  * @author listening
@@ -14,6 +11,6 @@ import java.io.Serializable;
  * @since 1.0
  */
 public interface XxlJobService {
-	
-	Response<XxlJobInfo> add(XxlJobInfo jobInfo);
+
+	ReturnT<XxlJobInfo> add(XxlJobInfo jobInfo);
 }

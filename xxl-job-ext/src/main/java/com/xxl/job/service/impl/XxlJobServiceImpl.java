@@ -7,7 +7,6 @@ import com.xxl.job.admin.core.route.ExecutorRouteStrategyEnum;
 import com.xxl.job.admin.core.schedule.XxlJobDynamicScheduler;
 import com.xxl.job.admin.dao.XxlJobGroupDao;
 import com.xxl.job.admin.dao.XxlJobInfoDao;
-import com.xxl.job.commons.Response;
 import com.xxl.job.service.XxlJobService;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.enums.ExecutorBlockStrategyEnum;
@@ -38,35 +37,35 @@ public class XxlJobServiceImpl implements XxlJobService {
   private XxlJobInfoDao xxlJobInfoDao;
 
   @Override
-  public Response<XxlJobInfo> add(XxlJobInfo jobInfo) {
+  public ReturnT<XxlJobInfo> add(XxlJobInfo jobInfo) {
     // valid
     XxlJobGroup group = xxlJobGroupDao.load(jobInfo.getJobGroup());
     if (group == null) {
-      return new Response(ReturnT.FAIL_CODE, "请选择“执行器”");
+      return new ReturnT(ReturnT.FAIL_CODE, "请选择“执行器”");
     }
     if (!CronExpression.isValidExpression(jobInfo.getJobCron())) {
-      return new Response(ReturnT.FAIL_CODE, "请输入格式正确的“Cron”");
+      return new ReturnT(ReturnT.FAIL_CODE, "请输入格式正确的“Cron”");
     }
     if (StringUtils.isBlank(jobInfo.getJobDesc())) {
-      return new Response(ReturnT.FAIL_CODE, "请输入“任务描述”");
+      return new ReturnT(ReturnT.FAIL_CODE, "请输入“任务描述”");
     }
     if (StringUtils.isBlank(jobInfo.getAuthor())) {
-      return new Response(ReturnT.FAIL_CODE, "请输入“负责人”");
+      return new ReturnT(ReturnT.FAIL_CODE, "请输入“负责人”");
     }
     if (ExecutorRouteStrategyEnum.match(jobInfo.getExecutorRouteStrategy(), null) == null) {
-      return new Response(ReturnT.FAIL_CODE, "路由策略非法");
+      return new ReturnT(ReturnT.FAIL_CODE, "路由策略非法");
     }
     if (ExecutorBlockStrategyEnum.match(jobInfo.getExecutorBlockStrategy(), null) == null) {
-      return new Response(ReturnT.FAIL_CODE, "阻塞处理策略非法");
+      return new ReturnT(ReturnT.FAIL_CODE, "阻塞处理策略非法");
     }
     if (ExecutorFailStrategyEnum.match(jobInfo.getExecutorFailStrategy(), null) == null) {
-      return new Response(ReturnT.FAIL_CODE, "失败处理策略非法");
+      return new ReturnT(ReturnT.FAIL_CODE, "失败处理策略非法");
     }
     if (GlueTypeEnum.match(jobInfo.getGlueType()) == null) {
-      return new Response(ReturnT.FAIL_CODE, "运行模式非法非法");
+      return new ReturnT(ReturnT.FAIL_CODE, "运行模式非法非法");
     }
     if (GlueTypeEnum.BEAN == GlueTypeEnum.match(jobInfo.getGlueType()) && StringUtils.isBlank(jobInfo.getExecutorHandler())) {
-      return new Response(ReturnT.FAIL_CODE, "请输入“JobHandler”");
+      return new ReturnT(ReturnT.FAIL_CODE, "请输入“JobHandler”");
     }
 
     // fix "\r" in shell
@@ -80,11 +79,11 @@ public class XxlJobServiceImpl implements XxlJobService {
       for (String childJobKeyItem : childJobKeys) {
         String[] childJobKeyArr = childJobKeyItem.split("_");
         if (childJobKeyArr.length != 2) {
-          return new Response(ReturnT.FAIL_CODE, MessageFormat.format("子任务Key({0})格式错误", childJobKeyItem));
+          return new ReturnT(ReturnT.FAIL_CODE, MessageFormat.format("子任务Key({0})格式错误", childJobKeyItem));
         }
         XxlJobInfo childJobInfo = xxlJobInfoDao.loadById(Integer.valueOf(childJobKeyArr[1]));
         if (childJobInfo == null) {
-          return new Response(ReturnT.FAIL_CODE, MessageFormat.format("子任务Key({0})无效", childJobKeyItem));
+          return new ReturnT(ReturnT.FAIL_CODE, MessageFormat.format("子任务Key({0})无效", childJobKeyItem));
         }
       }
     }
@@ -92,7 +91,7 @@ public class XxlJobServiceImpl implements XxlJobService {
     // add in db
     xxlJobInfoDao.save(jobInfo);
     if (jobInfo.getId() < 1) {
-      return new Response(ReturnT.FAIL_CODE, "新增任务失败");
+      return new ReturnT(ReturnT.FAIL_CODE, "新增任务失败");
     }
 
     // add in quartz
@@ -101,8 +100,8 @@ public class XxlJobServiceImpl implements XxlJobService {
     try {
       XxlJobDynamicScheduler.addJob(qz_name, qz_group, jobInfo.getJobCron());
       //XxlJobDynamicScheduler.pauseJob(qz_name, qz_group);
-      Response ret = new Response(ReturnT.SUCCESS_CODE, null);
-      ret.setBody(jobInfo);
+      ReturnT ret = new ReturnT(ReturnT.SUCCESS_CODE, null);
+      ret.setContent(jobInfo);
       return ret;
     } catch (SchedulerException e) {
       logger.error(e.getMessage(), e);
@@ -112,7 +111,7 @@ public class XxlJobServiceImpl implements XxlJobService {
       } catch (SchedulerException e1) {
         logger.error(e.getMessage(), e1);
       }
-      return new Response(ReturnT.FAIL_CODE, "新增任务失败:" + e.getMessage());
+      return new ReturnT(ReturnT.FAIL_CODE, "新增任务失败:" + e.getMessage());
     }
   }
 }
