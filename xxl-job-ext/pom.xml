@@ -13,6 +13,11 @@
   <artifactId>xxl-job-ext</artifactId>
   <packaging>war</packaging>
 
+  <properties>
+    <logback.version>1.1.10</logback.version>
+    <fastjson.version>1.2.31</fastjson.version>
+  </properties>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -39,6 +44,12 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <dependency>
+      <groupId>com.xuxueli</groupId>
+      <artifactId>xxl-job-admin</artifactId>
+      <version>${project.parent.version}</version>
+      <type>war</type>
+    </dependency>
     <!-- spring boot -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -47,7 +58,7 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-tomcat</artifactId>
-      <!--<scope>provided</scope>-->
+      <scope>provided</scope>
     </dependency>
     <!-- spring boot 热部署 -->
     <dependency>
@@ -58,7 +69,29 @@
     <dependency>
       <groupId>com.alibaba</groupId>
       <artifactId>fastjson</artifactId>
-      <version>1.2.31</version>
+      <version>${fastjson.version}</version>
+    </dependency>
+    <!-- 日志库 -->
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-core</artifactId>
+      <version>${logback.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>${logback.version}</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>slf4j-api</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-access</artifactId>
+      <version>${logback.version}</version>
     </dependency>
     <!-- test -->
     <dependency>
@@ -87,6 +120,29 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <!-- war打包插件 -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>2.6</version>
+        <configuration>
+          <packagingExcludes>WEB-INF/web.xml</packagingExcludes>
+          <overlays>
+            <!-- 合并admin -->
+            <overlay>
+              <groupId>com.xuxueli</groupId>
+              <artifactId>xxl-job-admin</artifactId>
+              <!-- 过滤admin中相同的配置文件 -->
+              <excludes>
+                <exclude>**/*.xml</exclude>
+                <exclude>**/*.properties</exclude>
+                <exclude>**/classes/**</exclude>
+                <exclude>**/lib/*</exclude>
+              </excludes>
+            </overlay>
+          </overlays>
+        </configuration>
       </plugin>
     </plugins>
   </build>
