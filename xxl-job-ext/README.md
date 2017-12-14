@@ -20,6 +20,11 @@
            
          避免内嵌的容器干扰需要部署的容器，需设置scope为provided
          
-   2. @SpringBootApplication启动类继承SpringBootServletInitializer，并且覆盖configure方法
+   2. @SpringBootApplication启动类继承SpringBootServletInitializer，并且覆盖configure方法,如
+        ```Java
+        @Override
+        protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+            return builder.sources(****Application.class);
+        }
    
    3. 添加相应的web.xml文件。
